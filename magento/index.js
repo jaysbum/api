@@ -1,44 +1,38 @@
 var module = require('../module/lib')
 var magento = require('./orders')
 var MagentoAPI = require('magento')
-
+setInterval(processOrders, 120000);
 async function getChannel() {
     let response = await module.fetch("http://api.xcommerce.co.th/v1/channels/search?channel_type_id=11&status=1")
     let data = await response.json()
     return data
 }
 
-//function processOrders(){
-getChannel().then( data => {
-  for(resp in data){
-    var cfg = {
-      host: data[resp].channel_url,
-      port: 80,
-      path: '/api/xmlrpc/',
-      login: data[resp].channel_username,
-      pass: data[resp].channel_password
+function processOrders(){
+  getChannel().then( data => {
+    for(resp in data){
+      var cfg = {
+        host: data[resp].channel_url,
+        port: 80,
+        path: '/api/xmlrpc/',
+        login: data[resp].channel_username,
+        pass: data[resp].channel_password
+      }
+      var magento = new MagentoAPI(cfg)
+      var config = { tenant_id:data[resp].tenant_id, channel_type_id:data[resp].channel_type_id}
+      //console.log(magento.orders);
+      orders(magento,config)
     }
-    var magento = new MagentoAPI(cfg)
-    var config = { tenant_id:data[resp].tenant_id, channel_type_id:data[resp].channel_type_id}
-    //console.log(magento.orders);
-    orders(magento,config)
-  }
-})
-//}
+  })
+}
 
 function orders(magento,config){
   module.magento.login(function(err, sessId) {
     module.magento.salesOrder.list({ filters: { created_at: { gteq: '2017-03-01 00:00:01' }}},function(err, result) {
       for(resp in result){
         module.magento.salesOrder.info({ orderIncrementId: result[resp].increment_id },function(err, res) {
-          module.http.get('http://api.xcommerce.co.th/v1/orders/'+ result[resp].increment_id,function(response){
-            var orderData = mapOrder(res,config)
-            if(response.statusCode == 200){
-              PutData(orderData,result[resp].increment_id)
-            }else{
-              PostData(orderData)
-            }
-          })
+          var orderData = mapOrder(res,config)
+          operate(orderData)
         })
       }
     })
@@ -162,6 +156,15 @@ function PutData(data,id) {
   post_req.write(post_data);
   post_req.end();
 
+}
+function operate(data){
+  module.http.get('http://api.xcommerce.co.th/v1/orders/'+ data.sync_order_id,function(response){
+    if(response.statusCode == 200){
+      PutData(data,data.sync_order_id)
+    }else{
+      PostData(data)
+    }
+  })
 }
 /*
 module.app.use(module.pretty({ query: 'pretty' }))

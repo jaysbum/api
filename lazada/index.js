@@ -1,6 +1,6 @@
 var module = require('../module/lib')
 var lazada = require('./orders')
-setInterval(processOrders, 36000);
+setInterval(processOrders, 120000);
 async function getChannel() {
     let response = await module.fetch("http://api.xcommerce.co.th/v1/channels/search?channel_type_id=2&status=1")
     let data = await response.json()
@@ -100,8 +100,8 @@ function mapOrder(data,cfg){
     sync_billing_address_postcode:data['AddressBilling']["PostCode"],
     sync_shipping_address:data['AddressShipping']["Address1"] + " " + data['AddressShipping']["Address2"],
     sync_shipping_address_postcode:data['AddressShipping']["PostCode"],
-    sync_shipper:data['DeliveryInfo'],
-    sync_shipping_type:null,
+    sync_shipper:"Kerry Express",
+    sync_shipping_type:"Flat rate",
   }
 }
 function mapDetail(data){
