@@ -1,6 +1,6 @@
 var module = require('../module/lib')
 var wooApi = require('woocommerce')
-setInterval(processOrders, 120000);
+setInterval(processOrders, 300000);
 async function getChannel() {
     let response = await module.fetch("http://api.xcommerce.co.th/v1/channels/search?channel_type_id=11&status=1")
     let data = await response.json()

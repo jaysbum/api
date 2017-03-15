@@ -1,9 +1,9 @@
 var module = require('../module/lib')
 var magento = require('./orders')
 var MagentoAPI = require('magento')
-setInterval(processOrders, 120000);
+setInterval(processOrders, 300000);
 async function getChannel() {
-    let response = await module.fetch("http://api.xcommerce.co.th/v1/channels/search?channel_type_id=11&status=1")
+    let response = await module.fetch("http://api.xcommerce.co.th/v1/channels/search?channel_type_id=10&status=1")
     let data = await response.json()
     return data
 }
@@ -20,7 +20,6 @@ function processOrders(){
       }
       var magento = new MagentoAPI(cfg)
       var config = { tenant_id:data[resp].tenant_id, channel_type_id:data[resp].channel_type_id}
-      //console.log(magento.orders);
       orders(magento,config)
     }
   })
@@ -166,20 +165,3 @@ function operate(data){
     }
   })
 }
-/*
-module.app.use(module.pretty({ query: 'pretty' }))
-module.app.get("/orders",function(reg,res){
-  res.send(woo.orders)
-})
-module.app.get("/products",function(reg,res){
-  res.send(woo.products)
-})
-module.app.get("/customers",function(reg,res){
-  res.send(woo.customers)
-})
-module.app.get("/detail",function(reg,res){
-  res.send(woo.detail)
-})
-module.app.listen(3002)
-console.log("app start at port 3002!!")
-*/
